@@ -3,7 +3,7 @@ import {Form, Button, Modal} from 'react-bootstrap'
 
 class ContactModal extends React.Component {
     render() {
-        let { contactData, show, handleSubmit, handleChange, handleClose } = this.props;
+        let { contactData, handleSubmit, handleChange, show, handleClose } = this.props;
         return (
             <Modal show={show} onHide={handleClose} animation={false}>
                 <Modal.Dialog>

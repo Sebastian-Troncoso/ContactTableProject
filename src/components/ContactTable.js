@@ -18,7 +18,7 @@ const ContactTableHeader = () => {
 }
 
 
-const ContactRow = ({ contact, toggleEdit, toggleDelete }) => {
+const ContactTableRow = ({ contact, toggleEdit, toggleDelete }) => {
     return (
         <tr>
             <td>{contact.contactId}</td>
@@ -63,7 +63,7 @@ class ContactTable extends React.Component{
             </thead>
             <tbody>
             {this.props.contacts.map((contact, i) => {
-                return <ContactRow contact = {contact} key={i}
+                return <ContactTableRow contact = {contact} key={i}
                                    toggleEdit={this.props.handleEdit}
                                    toggleDelete={this.props.handleDelete}/>
             })}

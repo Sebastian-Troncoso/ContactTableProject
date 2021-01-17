@@ -9,6 +9,41 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 const SERVICE_URL = "https://tsg-contactlist.herokuapp.com"
 
 class App extends React.Component {
+
+    state = {
+        loading: false,
+        showEditModal: false,
+        contactData: [
+            {
+                "contactId": 1, "firstName": "Fake",
+                "lastName": "Data",
+                "company": "Unknown Inc.",
+                "phone": "000-0000",
+                "email": "fakedata@unknown.io"
+            }],
+        newContactData: {
+            firstName: '',
+            lastName: '',
+            company: '',
+            phone: '',
+            email: ''
+        },
+        editContactData: {
+            "contactId": 42,
+            "firstName" : "Zaphod",
+            "lastName": "Beeblebrox",
+            "company": "Heart of Gold",
+            "phone": "000-0000",
+            "email": "prez@badnews.us"
+        }, addFormErrors: {
+            firstName : '',
+            lastName : '',
+            company : '',
+            phone : '',
+            email : ''
+        }
+    }
+
     //  Allow the contactModal child component to pass back up the information via the eventHandler, where the parent
     // App component can update its editContactData state variable, triggering a re-render of information displayed
     // within the ContactModal form.
@@ -74,17 +109,21 @@ class App extends React.Component {
             });
     }
 
+
+    // handle triggers modal to close.
     handleEditModalClose = (event) => {
         console.log("Closing Edit Modal")
         this.setState({showEditModal: false})
     }
 
+    // Handle triggers model to be opened
     handleEditModalOpen = (event) => {
         console.log("Opening Edit Modal")
         if (event) event.preventDefault();
+
         let contactId = event.target.value;
         console.log(`Editing contact id ${contactId}`)
-        this.setState({showEditModal: true})
+
 
         // submit a GET request to the /contact/{contactId} endpoint
         // the response should come back with the associated contact's JSON
@@ -114,9 +153,68 @@ class App extends React.Component {
         }
     }
 
+
+    validateContact = (contact) => {
+        let errors = {
+            firstName : "",
+            lastName: "",
+            company: "",
+            phone: "",
+            email:"",
+            isValid: true
+        }
+
+        let isInvalid = false;
+
+        if(!contact.firstName){
+            errors.firstName = "Please enter a first name."
+            errors.isValid = false;
+        }
+
+        if(!contact.lastName){
+            errors.lastName = "Please enter a last name."
+            errors.isValid = false;
+        }
+
+        if(!contact.company){
+            errors.company = "Please enter the company name."
+            errors.isValid = false;
+        }
+
+        if(!contact.phone && !contact.email){
+            errors.phone = "Please enter a phone or email contact (or both)."
+            errors.email = "Please enter a phone or email contact (or both)."
+            errors.isValid = false;
+        }
+
+        let phonePattern = "[0-9]{3}-[0-9]{4}";
+        if(contact.phone && !contact.phone.match(phonePattern)){
+            errors.phone = "Please match the expected pattern."
+            errors.isValid = false;
+        }
+
+        let emailPattern = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+        if(contact.email && !contact.email.match(emailPattern)){
+            errors.email = "Please match the expected pattern."
+            errors.isValid = false;
+        }
+
+        return errors;
+    }
+
+
+
+
     handleAddFormSubmit = (event) => {
         console.log("Adding contact!")
         if (event) event.preventDefault();
+
+        let validationErrors = this.validateContact(this.state.newContactData)
+        if(!validationErrors.isValid){
+            console.log("New contact is invalid. Reporting errors.", validationErrors)
+            this.setState({addFormErrors : validationErrors})
+            return
+        }
 
         fetch(SERVICE_URL + '/contact/', {
             method: 'POST',
@@ -132,8 +230,7 @@ class App extends React.Component {
                 this.loadContactData();
             })
             .catch((error) => {
-                console.log('Add Contact - Error:')
-                console.log(error)
+                console.log('Add Contact - Error:', error)
             });
     }
 
@@ -148,33 +245,7 @@ class App extends React.Component {
             ))
     }
 
-    state = {
-        loading: false,
-        showEditModal: false,
-        contactData: [
-            {
-                "contactId": 1, "firstName": "Fake",
-                "lastName": "Data",
-                "company": "Unknown Inc.",
-                "phone": "000-0000",
-                "email": "fakedata@unknown.io"
-            }],
-        newContactData: {
-            firstName: '',
-            lastName: '',
-            company: '',
-            phone: '',
-            email: ''
-        },
-        editContactData: {
-            "contactId": 42,
-            "firstName" : "Zaphod",
-            "lastName": "Beeblebrox",
-            "company": "Heart of Gold",
-            "phone": "000-0000",
-            "email": "prez@badnews.us"
-        }
-    }
+
 
     componentDidMount() {
         console.log("App is now mounted.")
@@ -204,13 +275,15 @@ class App extends React.Component {
                         <ContactForm
                             handleSubmit={this.handleAddFormSubmit}
                             handleChange={this.handleAddFormChange}
-                            contactData={this.state.newContactData} />
+                            contactData={this.state.newContactData}
+                            contactErrors={this.state.addFormErrors}
+                        />
                     </Col>
                 </Row>
                 <ContactModal
                     show={this.state.showEditModal}
-                    handleSubmit={this.handleAddFormSubmit}
-                    handleChange={this.handleAddFormChange}
+                    handleSubmit={this.handleEditFormSubmit}
+                    handleChange={this.handleEditFormChange}
                     handleClose={this.handleEditModalClose}
                     contactData={this.state.editContactData}/>
             </Container>
