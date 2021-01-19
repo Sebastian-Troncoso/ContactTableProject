@@ -14,6 +14,7 @@ const ContactTableHeader = () => {
             <th></th>
             <th></th>
         </tr>
+
     );
 }
 
