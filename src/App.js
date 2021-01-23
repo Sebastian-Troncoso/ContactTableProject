@@ -41,6 +41,13 @@ class App extends React.Component {
             company : '',
             phone : '',
             email : ''
+        },
+        editFormErrors: {
+            firstName: '',
+            lastName: '',
+            company: '',
+            phone: '',
+            email: ''
         }
     }
 
@@ -70,6 +77,13 @@ class App extends React.Component {
         console.log(`Submitting edit for contact id ${contactId}`)
         console.log(this.state.editContactData)
 
+        let validationErrors = this.validateContact(this.state.editContactData)
+        if(!validationErrors.isValid) {
+            console.log("Edited contact is invalid. Reporting errors.")
+            this.setState({editFormErrors: validationErrors})
+            return
+        }
+
         fetch(SERVICE_URL + '/contact/' + contactId, {
             method: 'PUT',
             headers: {
@@ -80,7 +94,7 @@ class App extends React.Component {
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-                this.setState({showEditModal: false})
+                this.setState({showEditModal: false, editFormErrors: validationErrors})
                 this.loadContactData();
             })
             .catch((error) => {
@@ -280,12 +294,14 @@ class App extends React.Component {
                         />
                     </Col>
                 </Row>
-                <ContactModal
+                <Row><Col><ContactModal
                     show={this.state.showEditModal}
                     handleSubmit={this.handleEditFormSubmit}
                     handleChange={this.handleEditFormChange}
                     handleClose={this.handleEditModalClose}
-                    contactData={this.state.editContactData}/>
+                    contactData={this.state.editContactData}
+                    contactErrors={this.state.editFormErrors}/>
+                </Col></Row>
             </Container>
         );
     }
