@@ -293,6 +293,7 @@ class App extends React.Component {
                             contactErrors={this.state.addFormErrors}
                         />
                     </Col>
+
                 </Row>
                 <Row><Col><ContactModal
                     show={this.state.showEditModal}
